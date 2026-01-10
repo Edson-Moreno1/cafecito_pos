@@ -1,22 +1,22 @@
 //Importaciones
-import mongoose from "mongoose";
 import express from "express";
-import dotenv from 'dotenv';
+import 'dotenv/config';
+import dbConnection  from "./src/config/database.js";
 
-dotenv.config();
+const app= express();
 
-
-
-const app = express();
-const PORT = process.env.PORT || 3001;
-
-
-//Conexión MongoDB
-import dbConnection from "./src/config/database.js";
+//Conectar a la base de datos 
 dbConnection();
 
+// Middlewares
 app.use(express.json());
 
+//Rutas
+app.get('/api', (req, res) => {
+    res.json({ message: '¡Hola desde la API!' });
+});
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
