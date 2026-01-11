@@ -2,11 +2,13 @@ import mongoose from "mongoose";
 
 const saleItemSchema = new mongoose.Schema({
     saleId:{
-        type: mongoose.Schema.Types.ObjectId,
-        required: true
+        type: String,
+        required: true,
+        unique: true
     },
     productId:{
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
         required: true
     },
     productNameSnapshot:{

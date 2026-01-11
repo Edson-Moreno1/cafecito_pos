@@ -4,7 +4,9 @@ const productSchema = new mongoose.Schema({
     
     name: {
         type: String,
-        required: true
+        required: true,
+        maxlength: 100,
+        minlength: 2,
     },
     price: {
         type: Number,

@@ -3,28 +3,31 @@ import mongoose from "mongoose";
 const saleSchema = new mongoose.Schema({
 
     customerId:{
-        type: Number,
-        required: false
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Customer',
+        default: null
     },
     paymentMethod:{
         type: String,
         required: true,
-        enum: ['efectivo', 'tarjeta_credito', 'tarjeta_debito','transferencia'],
-        default: 'efectivo'
+        enum:["cash","credit_card","debit_card","transfer"],
+        default: "cash"       
     },
     subtotal:{
         type: Number,
         required: true,
+        min: 0
     },
     discountPercent:{
         type: Number,
-        required: false,
-        default: 0
+        default: 0,
+        min: 0,
+        max: 100
     },
     discountAmount:{
         type: Number,
-        required: false,
-        default: 0
+        default: 0,
+        min: 0
     },
     total:{
         type: Number,
