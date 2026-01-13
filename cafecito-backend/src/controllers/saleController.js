@@ -3,6 +3,7 @@ import Product from "../models/Product.js";
 import Customer from "../models/Customer.js";
 
 import { calculateDiscount } from "../services/discountService.js";
+import { processSaleItems } from "../services/saleService.js";
 
 export const createSale = async (req, res) => {
     try{
@@ -22,9 +23,6 @@ export const createSale = async (req, res) => {
         }
 //Paso 3: Validar stock y calcular Subtotal 
 //Nota : Aun no restamos stock, solo calculamos numeros 
-        let subtotal = 0;
-        const finalItems = [];
-
         for(const itemRequest of items){
             const product = productsInDb.find(p => p._id.toString() === itemRequest.productId);
 
@@ -33,28 +31,26 @@ export const createSale = async (req, res) => {
                 return res.status(400).json({ message: `Stock insuficientes para: ${product.name}`});
             }
 
-            //Calcular precio de esta linea
-            const lineTotal = product.price * itemRequest.quantity;
-            subtotal += lineTotal;
-
-            //Preparamos el item para guardarlo en la venta (Embeded Document)
-            finalItems.push({
-                productId: product._id,
-                productName: product.name,
-                priceAtSale: product.price,
-                quantity: itemRequest.quantity,
-            });
+            
         }
+//Paso 4. Procesamiento de items
+        const {subtotal,saleDetails} = processSaleItems(items,productsInDb);
 
-// Paso 4: Calcular Descuento (Usando tu servicio)
+// Paso 5: Calcular Descuento (Usando tu servicio)
         const discountPercentage = calculateDiscount(customer.purchasesCount);
         const discountAmount = (subtotal * discountPercentage) /100;
         const finaltotal = subtotal - discountAmount;
-//Paso 5: Persistencia (Guardar todo)
+
+// Generador de ID Unico
+// Genremos un string unico simple Ej: "Sale"
+        const uniqueSaleId = `SALE-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+//Paso 6: Persistencia (Guardar todo)
 //A.Guardar la venta
         const newSale = new Sale({
+            saleId: uniqueSaleId,
             customerId: customer._id,
-            items: finalItems,
+            items: saleDetails,
             subtotal: subtotal,
             discountPercent: discountPercentage,
             discountAmount: discountAmount,
@@ -68,9 +64,9 @@ export const createSale = async (req, res) => {
 //C. Actualizar Sctock de Productos
 //Ahora que la venta es segura, restamos el inventario
         for(const itemRequest of items){
-            const product = productsInDb.find(p => p._id.toString() === itemRequest.productId);
-            product.stock -= itemRequest.quantity;
-            await product.save();
+            await Product.findByIdAndUpdate(itemRequest.productId,{
+                $inc: {stock: -itemRequest.quantity}
+            });
         }
 //Paso 6: Respuesta al FrontEnd
         res.status(201).json({
@@ -79,7 +75,7 @@ export const createSale = async (req, res) => {
 
         });
             
-        res.status(200).json({message: " Controlador conectado correctamente"});
+        
     }catch(error){
         console.error("Error al crear venta:",error);
         res.status(500).json({
