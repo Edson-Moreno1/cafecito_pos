@@ -84,3 +84,33 @@ export const createSale = async (req, res) => {
         });
     }
 };
+
+export const getSales = async (req, res) => {
+    try{
+        const sales = await Sale.find()
+        .populate("customerId","name email")
+        .sort({ createdAt: -1});
+
+        res.status(200).json(sales);
+    }catch(error){
+        res.status(500).json({ message: "Error al obtener las ventas"});
+    }
+};
+
+export const getSalebyId = async (req, res) => {
+    try{
+        const { id} = req.params;
+
+        const sale = await Sale.findOne({
+            $or: [{_id: id},{saleId: id}]
+        }).populate("customerId","name email");
+
+        if(!sale){
+            return res.status(404).json({ message: "Venta no encontrada"});
+        }
+
+        res.status(200).json(sale);
+    }catch(error){
+        res.status(500).json({ message: "Error al obtener la venta"});
+    }
+}; 
