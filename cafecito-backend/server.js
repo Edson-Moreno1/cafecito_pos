@@ -6,6 +6,7 @@ import customerRoutes from "./src/routes/customerRoutes.js";
 import productRoutes from "./src/routes/productRoutes.js";
 import saleRoutes from "./src/routes/saleRoutes.js";
 import cors from "cors";
+import authRoutes from "./src/routes/authRoutes.js";
 
 const app= express();
 
@@ -22,6 +23,7 @@ app.get('/api', (req, res) => {
 });
 
 //Montaje de rutas
+app.use('/api/auth', authRoutes);
 app.use('/api/sales', saleRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/products', productRoutes);
