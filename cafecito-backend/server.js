@@ -29,6 +29,14 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/products', productRoutes);
 
 const PORT = process.env.PORT || 3000;
+
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+    });
+}
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
+
+export default app;
