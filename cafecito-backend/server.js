@@ -22,6 +22,7 @@ app.get('/api', (req, res) => {
     res.json({ message: '¡Hola desde la API!' });
 });
 
+
 //Montaje de rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/sales', saleRoutes);
