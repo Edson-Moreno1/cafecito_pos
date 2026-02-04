@@ -29,21 +29,29 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 });
 
-userSchema.pre('save', async function () {
-    if (!this.isModified('password'))
-        return;
+// ✅ CORREGIDO: next es un parámetro de la función
+userSchema.pre('save', async function (next) {
+    
+    // Si la contraseña no fue modificada, continuar sin hashear
+    if (!this.isModified('password')) {
+        console.log('⏭️ Password no modificado, saltando hash');
+        return next();
+    }
 
-    try{
+    try {
+         
         const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password,salt);
+        this.password = await bcrypt.hash(this.password, salt);
+        console.log('✅ Password hasheado exitosamente');
         
-    }catch(error){
-        throw new Error('Error al encriptar la contraseña');  
+    } catch (error) {
+       
+        next(error);
     }
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
-    return await bcrypt.compare(candidatePassword,this.password);
+    return await bcrypt.compare(candidatePassword, this.password);
 }
 
 export default mongoose.model('User', userSchema);

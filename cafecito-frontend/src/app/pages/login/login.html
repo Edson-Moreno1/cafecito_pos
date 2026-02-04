@@ -1,0 +1,70 @@
+<div class="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 400px;">
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <h2 class="text-primary fw-bold">☕ Cafecito POS</h2>
+                <p class="text-muted">Inicia sesión para continuar</p>
+               @if (errorMessage) {
+                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <div>
+                        {{ errorMessage }}
+                    </div>
+
+                </div>
+               }
+               <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+                <div class="mb-3">
+                    <label for="email" class="form-label fw-semibold">Correo Electrónico</label>
+                    <input 
+                    type="email"
+                    id="email"
+                    class="form-control"
+                    formControlName="email"
+                    placeholder="barista@cafecito.com"
+                    [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                    >
+                    @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched){
+                        <div class="invalid-feedback d-block">
+                            Ingresa un correo valido
+                        </div>
+                    }
+
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form label fw-semibold">Contraseña</label>
+                    <input type="password"
+                    id="password"
+                    class="form-control"
+                    formControlName="password"
+                    placeholder="********"
+                    >
+                    @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched){
+                        <div class="text-danger small mt-1">
+                            La contraseña es requerida (min 6 caracteres)
+                        </div>
+                    }
+
+
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg" [disabled]="loginForm.invalid">
+                        Ingresar
+                    </button>
+
+                </div>
+
+               </form>
+
+            </div>
+
+        </div>
+            <div class="card-footer text-center bg-white border-0 mt-3">
+                <small class="text-muted">Sistema v1.0 - Hecho con 💚 y Cafeína</small>
+    </div>
+    </div>
+
+
+

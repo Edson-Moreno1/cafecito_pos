@@ -1,5 +1,6 @@
 import User from "../models/Users.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
 const generateToken = (id) =>{
     return jwt.sign({ id},process.env.JWT_SECRET,{
@@ -40,12 +41,14 @@ export const register = async (req, res)=> {
 
 
 
-export const login = async(req,res) => {
-    try{
+export const login = async(req, res) => {
+    try {
         const { email, password } = req.body;
+        
+        
         const user = await User.findOne({ email }).select('+password');
 
-        if(!user){
+        if (!user) {
             return res.status(400).json({
                 success: false,
                 message: 'Credenciales inválidas'
@@ -53,27 +56,29 @@ export const login = async(req,res) => {
         }
 
         const isMatch = await user.comparePassword(password);
-        if(!isMatch){
+        if (!isMatch) {
             return res.status(400).json({
                 success: false,
                 message: 'Credenciales inválidas'
             });
         }
 
+        
         res.json({
             success: true,
             token: generateToken(user._id),
-            user:{
+            user: {
                 _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role
+                name: user.name,    
+                email: user.email,  
+                role: user.role     
             }
         });
-    }catch (error){
+    } catch (error) {
         res.status(500).json({
             success: false,
-            error: error.message
+            message: error.message
         });
     }
 };
+
