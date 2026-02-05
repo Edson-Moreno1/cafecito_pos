@@ -1,7 +1,6 @@
 export type role = 'admin' | 'cajero';
 
-
-//Entidad Usario esta definida en el BD
+// Entidad Usuario definida en la BD
 export interface User {
     _id: string;
     name: string;
@@ -10,19 +9,22 @@ export interface User {
     createdAt?: Date;
     updatedAt?: Date;
 }
-//Loque devuelve el backend al autenticar
+
+// Lo que devuelve el backend al autenticar
 export interface AuthResponse {
-    user: User;
+    success: boolean;  
     token: string;
+    user: User;
+    message?: string;  
 }
 
-// Lo que envias para logearte
+// Lo que envías para loguearte
 export interface LoginData {
     email: string;
     password: string;
 }
 
-// Lo que envias para registrarte
+// Lo que envías para registrarte
 export interface RegisterData {
     name: string;
     email: string;
