@@ -1,0 +1,35 @@
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--cafe-primary) ;">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#">
+            <i class="bi bi-cup-hot-fill"></i> Cafecito POS
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link" routerLink="/sales" routerLinkActive="active">
+                    <i class="bi bi-shop"></i> Ventas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-people"></i>Clientes
+                </a>
+            </li>
+
+        </ul>
+        <div class="d-flex alig-items-center text-white">
+            <span class="me-3 small"><i class="bi bi-person-circle"></i>Barista</span>
+            <button class="btn btn-sm btn-outline-light" (click)="logout()">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </button>
+
+        </div>
+
+    </div>
+
+    </div>
+
+</nav><!-- final del Nav-->

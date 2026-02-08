@@ -1,3 +1,4 @@
+import { Product } from "./product.interface";
 export type PaymentMethod = 'cash' | 'card' | 'transfer';
 
 export interface SaleItem{
@@ -20,4 +21,10 @@ export interface Sale {
     total: number;
     createdAt?: Date;
     updatedAt?: Date;
+}
+
+export interface CartItem {
+    product: Product;
+    quantity: number;
+    amount: number;
 }
