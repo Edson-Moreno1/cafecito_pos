@@ -1,0 +1,37 @@
+.nav-tabs .nav-link {
+    color: #6c757d;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--cafe-primary, #5D4037);
+    border-bottom: 3px solid var(--cafe-primary, #5D4037);
+    background: transparent;
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+    color: var(--cafe-primary, #5D4037);
+    border-bottom: 3px solid #dee2e6;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.cursor-pointer:hover {
+    background-color: #f8f9fa;
+}
+
+.table th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+}
+
+.modal {
+    background-color: rgba(0, 0, 0, 0.3);
+}

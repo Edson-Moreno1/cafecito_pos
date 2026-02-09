@@ -1,0 +1,37 @@
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--cafe-primary);">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#">
+            <i class="bi bi-cup-hot-fill"></i> Cafecito POS
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/sales" routerLinkActive="active">
+                        <i class="bi bi-shop"></i> Ventas
+                    </a>
+                </li>
+                @if (isAdmin) {
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                }
+            </ul>
+            <div class="d-flex align-items-center text-white">
+                <span class="me-3 small">
+                    <i class="bi bi-person-circle"></i> {{ userName }}
+                    <span class="badge ms-1" [class]="isAdmin ? 'bg-warning text-dark' : 'bg-info'">
+                        {{ userRole }}
+                    </span>
+                </span>
+                <button class="btn btn-sm btn-outline-light" (click)="logout()">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>

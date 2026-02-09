@@ -7,7 +7,7 @@ import productRoutes from "./src/routes/productRoutes.js";
 import saleRoutes from "./src/routes/saleRoutes.js";
 import cors from "cors";
 import authRoutes from "./src/routes/authRoutes.js";
-
+import userRoutes from "./src/routes/userRoutes.js";
 const app= express();
 
 //Conectar a la base de datos 
@@ -28,6 +28,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/sales', saleRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 3000;
 
@@ -36,8 +37,6 @@ if (process.env.NODE_ENV !== 'test') {
         console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
     });
 }
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
-});
+
 
 export default app;
