@@ -4,7 +4,7 @@ export const processSaleItems = (itemsRequest, productsInDb) => {
     let subtotal = 0;
 
     const saleDetails = itemsRequest.map(ItemsRequest => {
-        const product = productsInDb.find(p => p._id.toString() === ItemsRequest.productId);
+        const product = productsInDb.find(p => p._id.toString() === ItemsRequest.product);
 
         const lineTotal = product.price * ItemsRequest.quantity;
         subtotal += lineTotal;

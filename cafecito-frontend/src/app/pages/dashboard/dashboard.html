@@ -1,0 +1,521 @@
+<app-navbar></app-navbar>
+<div class="container-fluid bg-light min-vh-100 py-3">
+
+    <!-- ========== STATS RÁPIDAS ========== -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-box-seam text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Productos</div>
+                        <div class="fw-bold fs-5">{{ products.length }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-exclamation-triangle text-warning fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Stock Bajo</div>
+                        <div class="fw-bold fs-5">{{ lowStockCount }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-people text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Clientes</div>
+                        <div class="fw-bold fs-5">{{ customers.length }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-graph-up text-info fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Ingresos Totales</div>
+                        <div class="fw-bold fs-5">{{ totalRevenue | currency:'MXN':'symbol':'1.0-0' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== TABS ========== -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white p-0">
+            <ul class="nav nav-tabs border-0">
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="activeTab === 'inventory'" (click)="activeTab = 'inventory'">
+                        <i class="bi bi-box-seam"></i> Inventario
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="activeTab === 'customers'" (click)="activeTab = 'customers'">
+                        <i class="bi bi-people"></i> Clientes
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="activeTab === 'users'" (click)="activeTab = 'users'">
+                        <i class="bi bi-person-gear"></i> Personal
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="activeTab === 'sales'" (click)="activeTab = 'sales'">
+                        <i class="bi bi-receipt"></i> Ventas
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body">
+
+            <!-- ===================== TAB 1: INVENTARIO ===================== -->
+            @if (activeTab === 'inventory') {
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Gestión de Productos</h5>
+                    <button class="btn btn-primary btn-sm" (click)="openProductModal()">
+                        <i class="bi bi-plus-circle"></i> Nuevo Producto
+                    </button>
+                </div>
+
+                @if (loadingProducts) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Categoría</th>
+                                    <th class="text-end">Precio</th>
+                                    <th class="text-center">Stock</th>
+                                    <th class="text-center">Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (product of products; track product._id) {
+                                    <tr [class.table-secondary]="product.isActive === false">
+                                        <td>
+                                            <div class="fw-bold">{{ product.name }}</div>
+                                            @if (product.description) {
+                                                <small class="text-muted">{{ product.description }}</small>
+                                            }
+                                        </td>
+                                        <td><span class="badge bg-light text-dark">{{ product.category }}</span></td>
+                                        <td class="text-end fw-bold">{{ product.price | currency:'MXN':'symbol':'1.0-0' }}</td>
+                                        <td class="text-center">
+                                            <span class="badge" [class]="getStockClass(product.stock)">
+                                                {{ product.stock }} — {{ getStockLabel(product.stock) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (product.isActive !== false) {
+                                                <span class="badge bg-success">Activo</span>
+                                            } @else {
+                                                <span class="badge bg-danger">Inactivo</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" (click)="openProductModal(product)" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn" [class]="product.isActive !== false ? 'btn-outline-warning' : 'btn-outline-success'"
+                                                    (click)="toggleProductActive(product)"
+                                                    [title]="product.isActive !== false ? 'Desactivar' : 'Activar'">
+                                                    <i class="bi" [class]="product.isActive !== false ? 'bi-eye-slash' : 'bi-eye'"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+
+            <!-- ===================== TAB 2: CLIENTES ===================== -->
+            @if (activeTab === 'customers') {
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Clientes Frecuentes</h5>
+                    <button class="btn btn-primary btn-sm" (click)="openCustomerModal()">
+                        <i class="bi bi-person-plus"></i> Nuevo Cliente
+                    </button>
+                </div>
+
+                @if (loadingCustomers) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Cliente</th>
+                                    <th>Email</th>
+                                    <th>Teléfono</th>
+                                    <th class="text-center">Compras</th>
+                                    <th class="text-center">Nivel</th>
+                                    <th class="text-center">Descuento</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (customer of customers; track customer._id; let i = $index) {
+                                    <tr>
+                                        <td class="text-muted">{{ i + 1 }}</td>
+                                        <td class="fw-bold">{{ customer.name }}</td>
+                                        <td>{{ customer.email }}</td>
+                                        <td>{{ customer.phone || '—' }}</td>
+                                        <td class="text-center">
+                                            <span class="fw-bold">{{ customer.purchasesCount }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge" [class]="getCustomerTier(customer.purchasesCount).badge">
+                                                {{ getCustomerTier(customer.purchasesCount).label }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center text-success fw-bold">
+                                            {{ getDiscountForCount(customer.purchasesCount) }}%
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" (click)="openCustomerModal(customer)" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" (click)="deleteCustomer(customer)" title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                @empty {
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">No hay clientes registrados</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+
+            <!-- ===================== TAB 3: USUARIOS ===================== -->
+            @if (activeTab === 'users') {
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Gestión de Personal</h5>
+                    <button class="btn btn-primary btn-sm" (click)="openUserModal()">
+                        <i class="bi bi-person-plus-fill"></i> Nuevo Usuario
+                    </button>
+                </div>
+
+                @if (loadingUsers) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th class="text-center">Rol</th>
+                                    <th class="text-center">Fecha registro</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (user of users; track user._id) {
+                                    <tr>
+                                        <td class="fw-bold">{{ user.name }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td class="text-center">
+                                            <span class="badge" [class]="user.role === 'admin' ? 'bg-warning text-dark' : 'bg-info'">
+                                                {{ user.role === 'admin' ? 'Administrador' : 'Cajero' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center text-muted">{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" (click)="openUserModal(user)" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" (click)="deleteUser(user)" title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                @empty {
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">No hay usuarios</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+
+            <!-- ===================== TAB 4: VENTAS ===================== -->
+            @if (activeTab === 'sales') {
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Historial de Ventas</h5>
+                    <span class="text-muted">{{ sales.length }} transacciones</span>
+                </div>
+
+                @if (loadingSales) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID Venta</th>
+                                    <th>Cliente</th>
+                                    <th class="text-center">Items</th>
+                                    <th class="text-center">Pago</th>
+                                    <th class="text-end">Subtotal</th>
+                                    <th class="text-end">Desc.</th>
+                                    <th class="text-end">Total</th>
+                                    <th class="text-center">Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (sale of sales; track sale._id) {
+                                    <tr class="cursor-pointer" (click)="toggleSaleDetail(sale)">
+                                        <td>
+                                            <code class="small">{{ sale.saleId }}</code>
+                                        </td>
+                                        <td>
+                                            @if (sale.customerId) {
+                                                {{ sale.customerId.name }}
+                                            } @else {
+                                                <span class="text-muted">Público general</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-secondary">{{ sale.items.length }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <i class="bi" [class]="getPaymentIcon(sale.paymentMethod)"></i>
+                                            <small class="ms-1">{{ getPaymentLabel(sale.paymentMethod) }}</small>
+                                        </td>
+                                        <td class="text-end">{{ sale.subtotal | currency }}</td>
+                                        <td class="text-end">
+                                            @if (sale.discountPercent && sale.discountPercent > 0) {
+                                                <span class="text-success">-{{ sale.discountPercent }}%</span>
+                                            } @else {
+                                                <span class="text-muted">—</span>
+                                            }
+                                        </td>
+                                        <td class="text-end fw-bold">{{ sale.total | currency }}</td>
+                                        <td class="text-center text-muted small">{{ sale.createdAt | date:'dd/MM/yy HH:mm' }}</td>
+                                    </tr>
+                                    <!-- Detalle expandible -->
+                                    @if (selectedSale?._id === sale._id) {
+                                        <tr>
+                                            <td colspan="8" class="bg-light p-3">
+                                                <div class="small">
+                                                    <strong>Detalle de productos:</strong>
+                                                    <ul class="mb-0 mt-1">
+                                                        @for (item of sale.items; track $index) {
+                                                            <li>
+                                                                {{ item.productNameSnapshot || 'Producto' }}
+                                                                — {{ item.quantity }} x {{ item.unitPriceSnapshot | currency }}
+                                                                = {{ item.lineTotal | currency }}
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                @empty {
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">No hay ventas registradas</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!--                        MODALES                                -->
+<!-- ============================================================ -->
+
+<!-- ===== MODAL: PRODUCTO ===== -->
+@if (showProductModal) {
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal d-block fade show" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ editingProductId ? 'Editar Producto' : 'Nuevo Producto' }}
+                    </h5>
+                    <button class="btn-close" (click)="closeProductModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control" [(ngModel)]="productForm.name" placeholder="Ej: Café Americano">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Precio</label>
+                            <input type="number" class="form-control" [(ngModel)]="productForm.price" min="0.01" step="0.5">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Stock</label>
+                            <input type="number" class="form-control" [(ngModel)]="productForm.stock" min="0">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Categoría</label>
+                        <select class="form-select" [(ngModel)]="productForm.category">
+                            @for (cat of categories; track cat) {
+                                <option [value]="cat">{{ cat }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" rows="2" [(ngModel)]="productForm.description" placeholder="Opcional"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">URLs de imágenes</label>
+                        <input type="text" class="form-control" [(ngModel)]="productForm.images" placeholder="url1, url2 (separadas por coma)">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" (click)="closeProductModal()">Cancelar</button>
+                    <button class="btn btn-primary" (click)="saveProduct()" [disabled]="!productForm.name || productForm.price <= 0">
+                        {{ editingProductId ? 'Guardar Cambios' : 'Crear Producto' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ===== MODAL: CLIENTE ===== -->
+@if (showCustomerModal) {
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal d-block fade show" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ editingCustomerId ? 'Editar Cliente' : 'Nuevo Cliente' }}
+                    </h5>
+                    <button class="btn-close" (click)="closeCustomerModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control" [(ngModel)]="customerForm.name" placeholder="Nombre completo">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" [(ngModel)]="customerForm.email" placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" [(ngModel)]="customerForm.phone" placeholder="Opcional">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" (click)="closeCustomerModal()">Cancelar</button>
+                    <button class="btn btn-primary" (click)="saveCustomer()" [disabled]="!customerForm.name || !customerForm.email">
+                        {{ editingCustomerId ? 'Guardar Cambios' : 'Crear Cliente' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ===== MODAL: USUARIO ===== -->
+@if (showUserModal) {
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal d-block fade show" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ editingUserId ? 'Editar Usuario' : 'Nuevo Usuario' }}
+                    </h5>
+                    <button class="btn-close" (click)="closeUserModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control" [(ngModel)]="userForm.name" placeholder="Nombre completo">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" [(ngModel)]="userForm.email" placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Contraseña
+                            @if (editingUserId) {
+                                <small class="text-muted">(dejar vacío para no cambiar)</small>
+                            }
+                        </label>
+                        <input type="password" class="form-control" [(ngModel)]="userForm.password" placeholder="Mínimo 6 caracteres">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rol</label>
+                        <select class="form-select" [(ngModel)]="userForm.role">
+                            <option value="cajero">Cajero</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" (click)="closeUserModal()">Cancelar</button>
+                    <button class="btn btn-primary" (click)="saveUser()" [disabled]="!userForm.name || !userForm.email">
+                        {{ editingUserId ? 'Guardar Cambios' : 'Crear Usuario' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
