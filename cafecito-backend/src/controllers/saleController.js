@@ -76,10 +76,28 @@ export const createSale = async (req, res) => {
             });
         }
 
+        const ticket ={
+            saleId: uniqueSaleId,
+            timestamp: savedSale.createdAt,
+            storeName: "Cafecito Feliz",
+            customerName: customer ? customer.name : "Cliente Anónimo",
+            items: saleDetails.map(item => ({
+                name: item.productNameSnapshot,
+                qty: item.quantity,
+                unitPrice: item.unitPriceSnapshot,
+                lineTotal: item.lineTotal
+            })),
+            subtotal: subtotal,
+            discount: `${discountPercentage}% (-$${discountAmount.toFixed(2)})`,
+            total: finaltotal,
+            paymentMethod: paymentMethod,
+        };
+
         // Paso 7: Respuesta al FrontEnd
         res.status(201).json({
             message: "Venta registrada con éxito",
-            sale: savedSale
+            sale: savedSale,
+            ticket: ticket
         });
             
     }catch(error){
