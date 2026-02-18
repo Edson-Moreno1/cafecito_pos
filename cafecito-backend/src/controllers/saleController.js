@@ -1,3 +1,4 @@
+import mongoose from "mongoose"; 
 import Sale from "../models/Sale.js";
 import Product from "../models/Product.js";
 import Customer from "../models/Customer.js";
@@ -49,8 +50,7 @@ export const createSale = async (req, res) => {
         // Generador de ID Único
         const uniqueSaleId = `SALE-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-        // Paso 6: Persistencia (Guardar todo)
-        // A. Guardar la venta
+        // Preparar la venta 
         const newSale = new Sale({
             saleId: uniqueSaleId,
             customerId: customer ? customer._id : null,
@@ -61,21 +61,41 @@ export const createSale = async (req, res) => {
             total: finaltotal,
             paymentMethod: paymentMethod
         });
-        const savedSale = await newSale.save();
+        //Paso 6: Persitencia Atomica
+
+        let savedSale;
+
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+
+        savedSale = await newSale.save({ session });
 
         // B. Actualizar al Cliente (+1 compra) SOLO SI EXISTE
         if (customer) {
             customer.purchasesCount += 1;
-            await customer.save();
+            await customer.save({ session });
         }
 
         // C. Actualizar Stock de Productos
         for(const itemRequest of items){
             await Product.findByIdAndUpdate(itemRequest.product, {
                 $inc: {stock: -itemRequest.quantity}
-            });
+            }, { session });
         }
+        //Todo salió bien → confirmar cambios
+        await session.commitTransaction();
 
+    }catch(error){
+         //Algo falló → revertir TODO
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        //  Siempre cerrar la sesión
+        session.endSession();
+    }
+
+        // Paso 6.5 Construir ticket
         const ticket ={
             saleId: uniqueSaleId,
             timestamp: savedSale.createdAt,
