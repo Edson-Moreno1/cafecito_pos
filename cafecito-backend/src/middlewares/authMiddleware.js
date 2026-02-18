@@ -35,3 +35,14 @@ export const isAdmin = (req, res, next) => {
         });
     }
 };
+
+export const isVendedorOrAdmin = (req, res, next) => {
+    if(req.user && (req.user.role === 'vendedor' || req.user.role === 'admin')){
+        next();
+    }else{
+        res.status(403).json({
+            success: false,
+            message: 'Acceso denegado: Requiere rol de vendedor o administrador'
+        });
+    }
+};

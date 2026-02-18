@@ -6,14 +6,18 @@ import {
     updateProduct,
     deleteProduct
 } from '../controllers/productController.js';
+import { isAdmin, verifyToken } from '../middlewares/authMiddleware.js';
 
 
 const router = express.Router();
 
+//Público
+
 router.get('/', getAllProducts);
 router.get('/:id', getProductById);
-router.post('/', createProduct);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
+// Solo admin
+router.post('/', verifyToken,isAdmin, createProduct);
+router.put('/:id',verifyToken,isAdmin, updateProduct);
+router.delete('/:id', verifyToken,isAdmin, deleteProduct);
 
 export default router;
