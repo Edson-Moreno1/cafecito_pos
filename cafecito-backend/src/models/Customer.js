@@ -10,16 +10,16 @@ const customerSchema = new mongoose.Schema({
     },
     phone:{
         type: String,
-        required: false,
         sparse: true,
         unique: true,
-        lowercase: true,
+        trim: true,
     },
     email:{
         type: String,
-        required: true,
+        sparse: true,
         unique: true,
         lowercase: true,
+        trim: true,
     },
     purchasesCount:{
         type: Number,
@@ -28,6 +28,13 @@ const customerSchema = new mongoose.Schema({
     }
 },{
     timestamps: true
+});
+
+customerSchema.pre('validate',function(next){
+    if(!this.phone && !this.email){
+        return next(new Error('Se requiere al menos un telèfono o email'));
+    }
+    next();
 });
 
 export default mongoose.model('Customer', customerSchema);
