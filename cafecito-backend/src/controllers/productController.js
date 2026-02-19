@@ -32,7 +32,7 @@ export const createProduct = async (req, res) => {
     }
 };
 
-export const updateProduct = async (req, res) => {
+/* export const updateProduct = async (req, res) => {
     try{
         const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if(!product){
@@ -41,6 +41,23 @@ export const updateProduct = async (req, res) => {
         res.json(product);
     }catch(error){
         res.status(500).json({ message: 'Server error', error: error.message });
+    }
+}; */
+
+export const updateProduct = async (req, res) => {
+    try{
+        const {name,price,stock,description} = req.body;
+        const updateData = { name, price, stock, description };
+        Object.keys(updateData).forEach(key => {
+            if(updateData[key] === undefined) delete updateData[key];
+        });
+        const product = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        if(!product){
+            return res.status(404).json({ message: 'Producto no encontrado'});
+        }
+        res.json(product);
+    }catch(error){
+        res.status(500).json({ message: 'Error al actualizar el producto', error: error.message });
     }
 };
 

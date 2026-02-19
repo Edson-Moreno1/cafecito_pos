@@ -35,7 +35,7 @@ export const createCustomer = async (req, res) => {
     }
 };
 
-export const updateCustomer = async (req, res) => {
+/*  export const updateCustomer = async (req, res) => {
     try{
         const { id } = req.params;
         const customer = await Customer.findByIdAndUpdate(id, req.body, { new: true });
@@ -46,8 +46,28 @@ export const updateCustomer = async (req, res) => {
     }catch(error){
         res.status(500).json({ message: 'Error al actualizar el cliente', error: error.message });
     }   
-};
+}; */
 
+export const updateCustomer = async (req,res) => {
+    try{
+        const {id} = req.params;
+
+        const {name,email,phone} = req.body;
+        const updateData = { name, email, phone };
+
+        Object.keys(updateData).forEach(key => {
+            if(updateData[key] === undefined) delete updateData[key];
+        });
+
+        const customer = await Customer.findByIdAndUpdate(id, updateData, { new: true });
+        if(!customer){
+            return res.status(404).json({message:'Cliente no encontrado'});
+        }
+        res.status(200).json(customer);
+    }catch(error){
+        res.status(500).json({ message: 'Error al actualizar el cliente', error: error.message });
+    }
+};
 export const deleteCustomer = async (req, res) => {
     try{
         const { id } = req.params;
