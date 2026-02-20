@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
-    
     name: {
         type: String,
         required: true,
-        maxlength: 100,
         minlength: 2,
+        maxlength: 100,
     },
     price: {
         type: Number,
@@ -23,23 +22,11 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    category: {
-        type: String,
-        required: true,
-        enum: {
-            values: ['Bebidas calientes','Frappucino','Bebidas frias','Bebidas Base Té','Cold Brew','Alimentos','Cafe en grano'],
-            message: '{VALUE} no es una categoriá válida'
-        }
-    },
-    images: [{
-        type: String
-    }],
     isActive:{
         type: Boolean,
         default: true
     }
-},
-{
+},{
     timestamps: true
 });
 
