@@ -1,11 +1,30 @@
-# Entorno 
+# Entorno
 .env
 .env.local
 .env.test
+.env.production
 
 # Dependencias
-node_modules
+node_modules/
 
-#Logs y otros
-npm-debug.log
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build
 dist/
+build/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+coverage/

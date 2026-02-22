@@ -10,16 +10,14 @@ const customerSchema = new mongoose.Schema({
     },
     phone:{
         type: String,
-        sparse: true,
-        unique: true,
         trim: true,
+        default: null,
     },
     email:{
         type: String,
-        sparse: true,
-        unique: true,
         lowercase: true,
         trim: true,
+        default: null,
     },
     purchasesCount:{
         type: Number,
@@ -30,11 +28,15 @@ const customerSchema = new mongoose.Schema({
     timestamps: true
 });
 
-customerSchema.pre('validate',function(next){
+
+customerSchema.index({ phone: 1 }, { unique: true, partialFilterExpression: { phone: { $type: 'string' } } });
+customerSchema.index({ email: 1 }, { unique: true, partialFilterExpression: { email: { $type: 'string' } } });
+customerSchema.pre('validate',function(){
     if(!this.phone && !this.email){
-        return next(new Error('Se requiere al menos un telèfono o email'));
+        this.invalidate('phone', 'Se requiere al menos un número de teléfono o un correo electrónico');
+        this.invalidate('email', 'Se requiere al menos un número de teléfono o un correo electrónico');
     }
-    next();
+    
 });
 
 export default mongoose.model('Customer', customerSchema);
