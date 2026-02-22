@@ -7,42 +7,30 @@ import { CartItem } from '../../models/sale.interface';
 })
 export class CartService {
   
-  // 1. ESTADO: Usamos una Signal para la lista de items
-  // Es como una variable que avisa automáticamente cuando cambia
+  // Estado reactivo con signals
   cartItems = signal<CartItem[]>([]);
 
-  // 2. COMPUTADOS: Se recalculan solos cuando cartItems cambia
-  // Subtotal (Suma de todos los amounts)
-  subtotal = computed(() => 
-    this.cartItems().reduce((acc, item) => acc + item.amount, 0)
+  // Computados: se recalculan cuando cartItems cambia
+  subtotal = computed(() =>
+    this.cartItems().reduce((acc, item) => acc + (item.product.price * item.quantity), 0)
   );
 
-  // Total (Podríamos agregar impuestos aquí si quisieras)
-  total = computed(() => this.subtotal()); 
-  
-  // Conteo de artículos (para el badge del carrito)
-  itemCount = computed(() => 
+  total = computed(() => this.subtotal());
+
+  itemCount = computed(() =>
     this.cartItems().reduce((acc, item) => acc + item.quantity, 0)
   );
-
-  // 3. MÉTODOS (ACCIONES)
 
   addToCart(product: Product) {
     const currentItems = this.cartItems();
     const existingItem = currentItems.find(item => item.product._id === product._id);
 
     if (existingItem) {
-      // Si ya existe, aumentamos cantidad
       this.updateQuantity(existingItem.product._id!, existingItem.quantity + 1);
     } else {
-      // Si es nuevo, lo agregamos
       this.cartItems.update(items => [
-        ...items, 
-        { 
-          product, 
-          quantity: 1, 
-          amount: product.price 
-        }
+        ...items,
+        { product, quantity: 1 }
       ]);
     }
   }
@@ -57,14 +45,10 @@ export class CartService {
       return;
     }
 
-    this.cartItems.update(items => 
+    this.cartItems.update(items =>
       items.map(item => {
         if (item.product._id === productId) {
-          return { 
-            ...item, 
-            quantity, 
-            amount: quantity * item.product.price 
-          };
+          return { ...item, quantity };
         }
         return item;
       })

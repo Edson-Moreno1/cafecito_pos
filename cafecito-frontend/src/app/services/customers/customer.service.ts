@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient,HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {Customer} from '../../models/customer.interface'
+import { PaginatedResponse } from '../../models/paginatedResponse.interface';
 @Injectable({
   providedIn: 'root',
 })
@@ -10,19 +11,26 @@ export class CustomerService {
 
   constructor(private http: HttpClient) {}
 
-  getAllCustomers(): Observable<Customer[]> {
-    return this.http.get<Customer[]>(this.apiUrl);
+  getAllCustomers(page= 1, limit = 20, q= ''): Observable<PaginatedResponse<Customer>> {
+    let params = new HttpParams()
+      .set('page',page)
+      .set('limit',limit);
+
+      if(q.trim()) {
+        params = params.set('q',q.trim());
+      }
+      return this.http.get<PaginatedResponse<Customer>>(this.apiUrl, { params });
   }
 
   getCustomerById(id: string): Observable<Customer> {
     return this.http.get<Customer>(`${this.apiUrl}/${id}`);
   }
 
-  createCustomer(customerData: Customer): Observable<Customer> {
+  createCustomer(customerData: Partial<Customer>): Observable<Customer> {
     return this.http.post<Customer>(this.apiUrl, customerData);
   }
 
-  updateCustomer(id: string, customerData: Customer): Observable<Customer> {
+  updateCustomer(id: string, customerData: Partial<Customer>): Observable<Customer> {
     return this.http.put<Customer>(`${this.apiUrl}/${id}`, customerData);
   }
 
