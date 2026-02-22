@@ -7,7 +7,7 @@ export interface RegisterData {
     name: string;
     email: string;
     password: string;
-    role?: 'admin' | 'cajero';
+    role?: 'admin' | 'vendedor';
 }
 
 export interface AuthResponse {
@@ -17,6 +17,6 @@ export interface AuthResponse {
         _id: string;
         name: string;
         email: string;
-        role: 'admin' | 'cajero';
+        role: 'admin' | 'vendedor';
     };
 }

@@ -8,26 +8,18 @@ export type PaymentMethod = 'cash' | 'card' | 'transfer';
 export interface SaleItemRequest {
     product: string;         // productId como string
     quantity: number;
-    unitPrice?: number;
-    amount?: number;
 }
 
 export interface SaleRequest {
-    customerId?: string;
+    customerId?: string | null; // Puede ser null para ventas sin cliente
     items: SaleItemRequest[];
-    subtotal: number;
-    total: number;
     paymentMethod: PaymentMethod;
 }
 
 // ========================
 // Lo que RECIBES del backend
 // ========================
-export interface CustomerPopulated {
-    _id: string;
-    name: string;
-    email: string;
-}
+
 
 export interface SaleItemDetail {
     productId: string;
@@ -39,11 +31,10 @@ export interface SaleItemDetail {
 
 export interface Sale {
     _id?: string;
-    saleId?: string;
-    customerId?: CustomerPopulated | null;
+    saleId: string;
+    customerId?: string | null;
     paymentMethod: PaymentMethod;
     items: SaleItemDetail[];
-
     subtotal: number;
     discountPercent?: number;
     discountAmount?: number;
@@ -53,10 +44,36 @@ export interface Sale {
 }
 
 // ========================
+// Ticket
+// ========================
+ export interface TicketItem{
+    name: string;
+    qty: number;
+    unitPrice: number;
+    lineTotal: number;
+ }
+
+ export interface Ticket{
+    saleId: string;
+    timestamp: string;
+    storeName: string;
+    customerName: string | null;
+    items: TicketItem[];
+    subtotal: number;
+    discount: string
+    total: number;
+    paymentMethod: PaymentMethod;
+    loyaltyMessage: string;
+ }
+ export interface SaleResponse{
+    message: string;
+    sale: Sale;
+    ticket: Ticket;
+ }
+// ========================
 // Carrito (frontend only)
 // ========================
 export interface CartItem {
     product: Product;
     quantity: number;
-    amount: number;
 }
