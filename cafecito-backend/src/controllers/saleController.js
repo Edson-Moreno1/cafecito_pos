@@ -3,7 +3,7 @@ import Sale from "../models/Sale.js";
 import Product from "../models/Product.js";
 import Customer from "../models/Customer.js";
 
-import { calculateDiscount } from "../services/discountService.js";
+import { calculateDiscount,getLoyaltyMessage } from "../services/discountService.js";
 import { processSaleItems } from "../services/saleService.js";
 
 export const createSale = async (req, res) => {
@@ -96,6 +96,9 @@ export const createSale = async (req, res) => {
     }
 
         // Paso 6.5 Construir ticket
+        // El mensaje se calucla DESPUES del incremento de purchasesCount
+
+        const LoyaltyMessage =customer ? getLoyaltyMessage(customer.purchasesCount): "Bienvenido a cafecito feliz";
         const ticket ={
             saleId: uniqueSaleId,
             timestamp: savedSale.createdAt,
@@ -111,6 +114,7 @@ export const createSale = async (req, res) => {
             discount: `${discountPercentage}% (-$${discountAmount.toFixed(2)})`,
             total: finaltotal,
             paymentMethod: paymentMethod,
+            loyaltyMessage: LoyaltyMessage
         };
 
         // Paso 7: Respuesta al FrontEnd
@@ -129,19 +133,41 @@ export const createSale = async (req, res) => {
     }
 };
 
+//Paginacion en getSales 
+
 export const getSales = async (req, res) => {
     try{
-        const sales = await Sale.find()
-        .populate("customerId", "name email")
-        .sort({ createdAt: -1});
+        const { page = 1, limit = 20} = req.query;
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
 
-        res.status(200).json(sales);
+        if(isNaN(pageNum)|| pageNum <1){
+            return res.status(400).json({message: 'page debe ser un entero mayor a 0'});
+        }
+        if(isNaN(limitNum)|| limitNum <1 || limitNum >100){
+            return res.status(400).json({message: 'limit debe ser un entero entre 1 y 100'});
+        }
+        const skip = (pageNum -1) * limitNum;
+        const [sales, total] = await Promise.all([
+            Sale.find()
+                .populate("customerId", " name email phone")
+                .sort({ createdAt: -1})
+                .skip(skip)
+                .limit(limitNum),
+            Sale.countDocuments()
+        ]);
+        res.status(200).json({
+            sales: sales,
+            total: total,
+            page: pageNum,
+            limit: limitNum
+        });
     }catch(error){
-        res.status(500).json({ message: "Error al obtener las ventas"});
+        res.status(500).json({message: "Error al obtener las ventas", error: error.message});
     }
 };
 
-export const getSalebyId = async (req, res) => {
+export const getSaleById = async (req, res) => {
     try{
         const { id } = req.params;
 
