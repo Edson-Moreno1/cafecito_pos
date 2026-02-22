@@ -170,10 +170,8 @@ export const getSales = async (req, res) => {
 export const getSaleById = async (req, res) => {
     try{
         const { id } = req.params;
-
-        const sale = await Sale.findOne({
-            $or: [{_id: id}, {saleId: id}]
-        }).populate("customerId", "name email");
+        const query = mongoose.Types.ObjectId.isValid(id) ? {$or: [{_id: id},{saleId: id}]}:{saleId: id};
+        const sale = await Sale.findOne(query).populate("customerId", "name email");
 
         if(!sale){
             return res.status(404).json({ message: "Venta no encontrada"});
@@ -181,6 +179,6 @@ export const getSaleById = async (req, res) => {
 
         res.status(200).json(sale);
     }catch(error){
-        res.status(500).json({ message: "Error al obtener la venta"});
+        res.status(500).json({ message: "Error al obtener la venta", error: error.message });
     }
 };
