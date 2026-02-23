@@ -10,7 +10,6 @@ import { SaleRequest, SaleItemRequest, PaymentMethod } from '../../models/sale.i
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-
 @Component({
   selector: 'app-sales',
   standalone: true,
@@ -24,16 +23,20 @@ export class Sales implements OnInit {
   private saleService = inject(SaleService);
   private customerService = inject(CustomerService);
 
+  // --- Productos + Paginación (COMMIT 1) ---
   products: Product[] = [];
-  filteredProducts: Product[] = [];
   searchTerm: string = '';
   loading: boolean = true;
+  currentPage = 1;
+  totalProducts = 0;
+  limit = 20;
+  private searchTimeout: any = null;
+
   processing: boolean = false;
 
   // --- Checkout ---
   showCheckout: boolean = false;
   customerSearch: string = '';
-  allCustomers: Customer[] = [];
   filteredCustomers: Customer[] = [];
   selectedCustomer: Customer | null = null;
   showCustomerResults: boolean = false;
@@ -44,31 +47,49 @@ export class Sales implements OnInit {
     this.loadProducts();
   }
 
+  // ==========================================
+  // COMMIT 1: Carga de productos con paginación
+  // ==========================================
+
   loadProducts() {
-    this.productService.getProducts().subscribe({
-      next: (data) => {
-        this.products = data;
-        this.filteredProducts = data;
+    this.loading = true;
+    this.productService.getProducts(this.currentPage, this.limit, this.searchTerm).subscribe({
+      next: (response) => {
+        this.products = response.data;
+        this.totalProducts = response.total;
         this.loading = false;
       },
       error: (err) => {
-        console.error(err);
+        console.error('Error al cargar productos:', err);
         this.loading = false;
       }
     });
   }
 
   onSearchChange() {
-    const term = this.searchTerm.toLowerCase().trim();
+    // Debounce: espera 300ms después de que el usuario deja de teclear
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.loadProducts();
+    }, 300);
+  }
 
-    if (term === '') {
-      this.filteredProducts = this.products;
-    } else {
-      this.filteredProducts = this.products.filter(product =>
-        product.name?.toLocaleLowerCase().includes(term) ||
-        product.description?.toLocaleLowerCase().includes(term) ||
-        product.category?.toLocaleLowerCase().includes(term)
-      );
+  get totalPages(): number {
+    return Math.ceil(this.totalProducts / this.limit);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
     }
   }
 
@@ -78,6 +99,7 @@ export class Sales implements OnInit {
 
   // =====================
   // CHECKOUT FLOW
+  // (se corregirá en commits 2-4)
   // =====================
 
   openCheckout() {
@@ -100,11 +122,11 @@ export class Sales implements OnInit {
     this.selectedPaymentMethod = 'cash';
   }
 
-  // --- Customer search ---
+  // --- Customer search (se mejorará en commit 2) ---
   loadCustomers() {
-    this.customerService.getAllCustomers().subscribe({
-      next: (data) => {
-        this.allCustomers = data;
+    this.customerService.getCustomers(1, 100).subscribe({
+      next: (response) => {
+        this.filteredCustomers = response.data;
       },
       error: (err) => {
         console.error('Error al cargar clientes:', err);
@@ -121,12 +143,16 @@ export class Sales implements OnInit {
       return;
     }
 
-    this.filteredCustomers = this.allCustomers.filter(c =>
-      c.name.toLowerCase().includes(term) ||
-      c.email.toLowerCase().includes(term) ||
-      c.phone.includes(term)
-    );
-    this.showCustomerResults = true;
+    // TODO commit 2: delegar búsqueda al backend con ?q=
+    this.customerService.getCustomers(1, 20, term).subscribe({
+      next: (response) => {
+        this.filteredCustomers = response.data;
+        this.showCustomerResults = true;
+      },
+      error: (err) => {
+        console.error('Error al buscar clientes:', err);
+      }
+    });
   }
 
   selectCustomer(customer: Customer) {
@@ -143,9 +169,9 @@ export class Sales implements OnInit {
 
   // --- Discount (mirrors backend discountService.js) ---
   calculateDiscount(purchasesCount: number): number {
-    if (purchasesCount >= 8) return 15;  // Gold
-    if (purchasesCount >= 4) return 10;  // Silver
-    if (purchasesCount >= 1) return 5;   // Basic
+    if (purchasesCount >= 8) return 15;
+    if (purchasesCount >= 4) return 10;
+    if (purchasesCount >= 1) return 5;
     return 0;
   }
 
@@ -164,7 +190,7 @@ export class Sales implements OnInit {
     return this.cartService.subtotal() - this.discountAmount;
   }
 
-  // --- Confirm sale ---
+  // --- Confirm sale (se corregirá en commit 3) ---
   confirmSale() {
     if (this.cartService.cartItems().length === 0) return;
 
@@ -172,26 +198,23 @@ export class Sales implements OnInit {
 
     const saleItems: SaleItemRequest[] = this.cartService.cartItems().map(item => ({
       product: item.product._id!,
-      quantity: item.quantity,
-      unitPrice: item.product.price,
-      amount: item.amount
+      quantity: item.quantity
     }));
 
     const saleData: SaleRequest = {
       customerId: this.selectedCustomer?._id,
       items: saleItems,
-      subtotal: this.cartService.subtotal(),
-      total: this.finalTotal,
       paymentMethod: this.selectedPaymentMethod
     };
 
     this.saleService.createSale(saleData).subscribe({
       next: (response) => {
         console.log('Venta procesada:', response);
+        // TODO commit 4: mostrar ticket en vez de alert
         this.cartService.clearCart();
         this.showCheckout = false;
         this.resetCheckout();
-        alert('✅ Venta procesada con éxito.');
+        alert('Venta procesada con éxito.');
         this.processing = false;
       },
       error: (err) => {
@@ -200,10 +223,5 @@ export class Sales implements OnInit {
         this.processing = false;
       }
     });
-  }
-
-  // Legacy method (kept for reference, now replaced by openCheckout + confirmSale)
-  processSale() {
-    this.openCheckout();
   }
 }
