@@ -202,8 +202,7 @@ export class Dashboard implements OnInit {
     } else {
       this.customerService.createCustomer(payload).subscribe({
         next: () => { this.loadCustomers(); this.closeCustomerModal(); },
-        error: (err: any) => alert('Error: ' + (err.error?.message || err.error?.details?.[0]?.message || err.message))
-      });
+        error: () =>{this.customers = []; this.loadingCustomers = false; }
     }
   }
 
@@ -211,7 +210,7 @@ export class Dashboard implements OnInit {
     if (!confirm(`¿Eliminar a ${customer.name}?`)) return;
     this.customerService.deleteCustomer(customer._id!).subscribe({
       next: () => this.loadCustomers(),
-      error: (err: any) => alert('Error: ' + (err.error?.message || err.message))
+      error: (err: any) => { this.customers = []; this.loadingCustomers = false; }
     });
   }
 
@@ -226,7 +225,7 @@ export class Dashboard implements OnInit {
         this.sales = response.data;
         this.loadingSales = false;
       },
-      error: () => { this.loadingSales = false; }
+      error: () => { this.sales = []; this.loadingSales = false; }
     });
   }
 
@@ -254,14 +253,14 @@ export class Dashboard implements OnInit {
 
   // ========== Stats rápidas ==========
   get totalRevenue(): number {
-    return this.sales.reduce((sum, s) => sum + s.total, 0);
+    return (this.sales || []).reduce((sum, s)=> sum + s.total,0);
   }
 
   get lowStockCount(): number {
-    return this.products.filter(p => p.stock <= 10 && p.isActive !== false).length;
+    return (this.products || []).filter(p => p.stock <= 10 && p.isActive !== false).length;
   }
 
   get topCustomer(): Customer | null {
-    return this.customers.length > 0 ? this.customers[0] : null;
+    return this.customers?.length > 0 ? this.customers[0] : null;
   }
 }
