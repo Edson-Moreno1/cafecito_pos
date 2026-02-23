@@ -6,7 +6,7 @@ import { SaleService } from '../../services/sales/sale.service';
 import { CustomerService } from '../../services/customers/customer.service';
 import { Product } from '../../models/product.interface';
 import { Customer } from '../../models/customer.interface';
-import { SaleRequest, SaleItemRequest, PaymentMethod } from '../../models/sale.interface';
+import { SaleRequest, SaleItemRequest, PaymentMethod, Ticket } from '../../models/sale.interface';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -43,6 +43,10 @@ export class Sales implements OnInit {
   showCustomerResults: boolean = false;
   discountPercent: number = 0;
   selectedPaymentMethod: PaymentMethod = 'cash';
+
+  // --- COMMIT 3: Ticket post-venta ---
+  showTicket: boolean = false;
+  currentTicket: Ticket | null = null;
 
   ngOnInit(): void {
     this.loadProducts();
@@ -191,7 +195,7 @@ export class Sales implements OnInit {
     return this.cartService.subtotal() - this.discountAmount;
   }
 
-  // --- Confirm sale (se corregirá en commit 3) ---
+  // --- COMMIT 3: Confirmar venta y mostrar ticket ---
   confirmSale() {
     if (this.cartService.cartItems().length === 0) return;
 
@@ -210,19 +214,34 @@ export class Sales implements OnInit {
 
     this.saleService.createSale(saleData).subscribe({
       next: (response) => {
-        console.log('Venta procesada:', response);
-        // TODO commit 4: mostrar ticket en vez de alert
+        // Guardar ticket y mostrar vista
+        this.currentTicket = response.ticket;
         this.cartService.clearCart();
         this.showCheckout = false;
+        this.showTicket = true;
         this.resetCheckout();
-        alert('Venta procesada con éxito.');
         this.processing = false;
       },
       error: (err) => {
         console.error('Error al procesar venta:', err);
-        alert('Error al procesar la venta. Inténtalo de nuevo.');
+        const message = err.error?.message || 'Error al procesar la venta. Inténtalo de nuevo.';
+        alert(message);
         this.processing = false;
       }
     });
+  }
+
+  closeTicket() {
+    this.showTicket = false;
+    this.currentTicket = null;
+  }
+
+  getPaymentMethodLabel(method: string): string {
+    const labels: Record<string, string> = {
+      'cash': 'Efectivo',
+      'card': 'Tarjeta',
+      'transfer': 'Transferencia'
+    };
+    return labels[method] || method;
   }
 }

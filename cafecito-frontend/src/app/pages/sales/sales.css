@@ -12,3 +12,9 @@
 .product-card:active {
   transform: scale(0.98);
 }
+
+/* COMMIT 3: Ticket styles */
+.border-dashed {
+  border-style: dashed !important;
+  border-color: #ccc !important;
+}

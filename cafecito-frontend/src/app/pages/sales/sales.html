@@ -75,7 +75,7 @@
         <div class="col-md-4">
 
             <!-- ========== VISTA 1: CARRITO ========== -->
-            @if (!showCheckout) {
+            @if (!showCheckout && !showTicket) {
             <div class="card h-100 shadow border-0">
                 <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
                     <span><i class="bi bi-cart4"></i> Orden Actual</span>
@@ -284,6 +284,89 @@
                         </button>
                         <button class="btn btn-outline-secondary" (click)="closeCheckout()">
                             <i class="bi bi-arrow-left"></i> Volver al carrito
+                        </button>
+                    </div>
+                </div>
+            </div>
+            }
+
+            <!-- ========== VISTA 3: TICKET POST-VENTA (COMMIT 3) ========== -->
+            @if (showTicket && currentTicket) {
+            <div class="card h-100 shadow border-0">
+                <div class="card-header bg-success text-white fw-bold text-center">
+                    <i class="bi bi-check-circle-fill"></i> ¡Venta Exitosa!
+                </div>
+
+                <div class="card-body overflow-auto p-3">
+                    <!-- Encabezado del ticket -->
+                    <div class="text-center mb-3">
+                        <h5 class="fw-bold mb-1">☕ {{ currentTicket.storeName }}</h5>
+                        <small class="text-muted d-block">{{ currentTicket.saleId }}</small>
+                        <small class="text-muted d-block">{{ currentTicket.timestamp | date:'dd/MM/yyyy HH:mm' }}</small>
+                    </div>
+
+                    @if (currentTicket.customerName) {
+                        <div class="text-center mb-2">
+                            <span class="badge bg-primary">
+                                <i class="bi bi-person-fill"></i> {{ currentTicket.customerName }}
+                            </span>
+                        </div>
+                    }
+
+                    <hr class="border-dashed">
+
+                    <!-- Items del ticket -->
+                    <ul class="list-group list-group-flush mb-2">
+                        @for (item of currentTicket.items; track item.name) {
+                            <li class="list-group-item d-flex justify-content-between px-0 py-1 border-0">
+                                <div>
+                                    <span>{{ item.name }}</span>
+                                    <br>
+                                    <small class="text-muted">{{ item.unitPrice | currency }} x {{ item.qty }}</small>
+                                </div>
+                                <span class="fw-bold">{{ item.lineTotal | currency }}</span>
+                            </li>
+                        }
+                    </ul>
+
+                    <hr class="border-dashed">
+
+                    <!-- Totales -->
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Subtotal:</span>
+                        <span>{{ currentTicket.subtotal | currency }}</span>
+                    </div>
+
+                    @if (currentTicket.discount && currentTicket.discount !== '0% (-$0.00)') {
+                        <div class="d-flex justify-content-between mb-1 text-success">
+                            <span>Descuento:</span>
+                            <span>{{ currentTicket.discount }}</span>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="h5 fw-bold">Total:</span>
+                        <span class="h5 fw-bold text-primary">{{ currentTicket.total | currency }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Método de pago:</span>
+                        <span>{{ getPaymentMethodLabel(currentTicket.paymentMethod) }}</span>
+                    </div>
+
+                    <!-- Loyalty Message -->
+                    @if (currentTicket.loyaltyMessage) {
+                        <div class="alert alert-warning text-center py-2 mb-0">
+                            <i class="bi bi-star-fill"></i>
+                            <strong>{{ currentTicket.loyaltyMessage }}</strong>
+                        </div>
+                    }
+                </div>
+
+                <div class="card-footer bg-white">
+                    <div class="d-grid">
+                        <button class="btn btn-primary btn-lg" (click)="closeTicket()">
+                            <i class="bi bi-plus-circle"></i> Nueva Venta
                         </button>
                     </div>
                 </div>
