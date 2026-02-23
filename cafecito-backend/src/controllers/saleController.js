@@ -157,7 +157,7 @@ export const getSales = async (req, res) => {
             Sale.countDocuments()
         ]);
         res.status(200).json({
-            sales: sales,
+            data: sales,
             total: total,
             page: pageNum,
             limit: limitNum
