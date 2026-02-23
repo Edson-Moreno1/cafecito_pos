@@ -160,7 +160,8 @@
                                     class="form-control"
                                     placeholder="Buscar por nombre, email o teléfono..."
                                     [(ngModel)]="customerSearch"
-                                    (ngModelChange)="onCustomerSearchChange()">
+                                    (ngModelChange)="onCustomerSearchChange()"
+                                    (blur)="closeCustomerDropdown()">
                                 
                                 <!-- Dropdown de resultados -->
                                 @if (showCustomerResults) {

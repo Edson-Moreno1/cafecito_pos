@@ -31,6 +31,7 @@ export class Sales implements OnInit {
   totalProducts = 0;
   limit = 20;
   private searchTimeout: any = null;
+  private customerSearchTimeout: any = null;
 
   processing: boolean = false;
 
@@ -105,7 +106,6 @@ export class Sales implements OnInit {
   openCheckout() {
     if (this.cartService.cartItems().length === 0) return;
     this.showCheckout = true;
-    this.loadCustomers();
   }
 
   closeCheckout() {
@@ -122,20 +122,9 @@ export class Sales implements OnInit {
     this.selectedPaymentMethod = 'cash';
   }
 
-  // --- Customer search (se mejorará en commit 2) ---
-  loadCustomers() {
-    this.customerService.getCustomers(1, 100).subscribe({
-      next: (response) => {
-        this.filteredCustomers = response.data;
-      },
-      error: (err) => {
-        console.error('Error al cargar clientes:', err);
-      }
-    });
-  }
-
+  // --- COMMIT 2: Búsqueda de clientes con debounce en backend ---
   onCustomerSearchChange() {
-    const term = this.customerSearch.toLowerCase().trim();
+    const term = this.customerSearch.trim();
 
     if (term.length < 2) {
       this.filteredCustomers = [];
@@ -143,16 +132,28 @@ export class Sales implements OnInit {
       return;
     }
 
-    // TODO commit 2: delegar búsqueda al backend con ?q=
-    this.customerService.getCustomers(1, 20, term).subscribe({
-      next: (response) => {
-        this.filteredCustomers = response.data;
-        this.showCustomerResults = true;
-      },
-      error: (err) => {
-        console.error('Error al buscar clientes:', err);
-      }
-    });
+    // Debounce: espera 300ms después de que el usuario deja de teclear
+    clearTimeout(this.customerSearchTimeout);
+    this.customerSearchTimeout = setTimeout(() => {
+      this.customerService.getCustomers(1, 10, term).subscribe({
+        next: (response) => {
+          this.filteredCustomers = response.data;
+          this.showCustomerResults = this.filteredCustomers.length > 0 || term.length >= 2;
+        },
+        error: (err) => {
+          console.error('Error al buscar clientes:', err);
+          this.filteredCustomers = [];
+          this.showCustomerResults = false;
+        }
+      });
+    }, 300);
+  }
+
+  closeCustomerDropdown() {
+    // Pequeño delay para permitir que el click en un resultado se registre
+    setTimeout(() => {
+      this.showCustomerResults = false;
+    }, 200);
   }
 
   selectCustomer(customer: Customer) {
