@@ -11,7 +11,7 @@
                     </div>
                     <div>
                         <div class="text-muted small">Productos</div>
-                        <div class="fw-bold fs-5">{{ products.length }}</div>
+                        <div class="fw-bold fs-5">{{ (products || []).length }}</div>
                     </div>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                     </div>
                     <div>
                         <div class="text-muted small">Clientes</div>
-                        <div class="fw-bold fs-5">{{ customers.length }}</div>
+                        <div class="fw-bold fs-5">{{ (customers || []).length }}</div>
                     </div>
                 </div>
             </div>
@@ -265,7 +265,7 @@
                                             }
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-secondary">{{ sale.items?.length || 0 }}</span>
+                                            <span class="badge bg-secondary">{{ (sale.items || []).length }}</span>
                                         </td>
                                         <td class="text-center">
                                             <i class="bi" [class]="getPaymentIcon(sale.paymentMethod)"></i>

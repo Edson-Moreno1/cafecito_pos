@@ -62,10 +62,10 @@ export class Dashboard implements OnInit {
     this.loadingProducts = true;
     this.productService.getProducts(1, 100).subscribe({
       next: (response) => {
-        this.products = response.data;
+        this.products = response.data || [];
         this.loadingProducts = false;
       },
-      error: () => { this.loadingProducts = false; }
+      error: () => { this.products = []; this.loadingProducts = false; }
     });
   }
 
@@ -147,10 +147,10 @@ export class Dashboard implements OnInit {
     this.loadingCustomers = true;
     this.customerService.getCustomers(1, 100).subscribe({
       next: (response) => {
-        this.customers = response.data;
+        this.customers = response.data || [];
         this.loadingCustomers = false;
       },
-      error: () => { this.loadingCustomers = false; }
+      error: () => { this.customers = []; this.loadingCustomers = false; }
     });
   }
 
@@ -202,7 +202,8 @@ export class Dashboard implements OnInit {
     } else {
       this.customerService.createCustomer(payload).subscribe({
         next: () => { this.loadCustomers(); this.closeCustomerModal(); },
-        error: () =>{this.customers = []; this.loadingCustomers = false; }
+        error: (err: any) => alert('Error: ' + (err.error?.message || err.error?.details?.[0]?.message || err.message))
+      });
     }
   }
 
@@ -210,7 +211,7 @@ export class Dashboard implements OnInit {
     if (!confirm(`¿Eliminar a ${customer.name}?`)) return;
     this.customerService.deleteCustomer(customer._id!).subscribe({
       next: () => this.loadCustomers(),
-      error: (err: any) => { this.customers = []; this.loadingCustomers = false; }
+      error: (err: any) => alert('Error: ' + (err.error?.message || err.message))
     });
   }
 
@@ -222,7 +223,7 @@ export class Dashboard implements OnInit {
     this.loadingSales = true;
     this.saleService.getSales(1, 100).subscribe({
       next: (response) => {
-        this.sales = response.data;
+        this.sales = response.data || [];
         this.loadingSales = false;
       },
       error: () => { this.sales = []; this.loadingSales = false; }
@@ -253,7 +254,7 @@ export class Dashboard implements OnInit {
 
   // ========== Stats rápidas ==========
   get totalRevenue(): number {
-    return (this.sales || []).reduce((sum, s)=> sum + s.total,0);
+    return (this.sales || []).reduce((sum, s) => sum + s.total, 0);
   }
 
   get lowStockCount(): number {
