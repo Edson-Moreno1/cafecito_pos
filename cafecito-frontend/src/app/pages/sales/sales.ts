@@ -7,13 +7,13 @@ import { CustomerService } from '../../services/customers/customer.service';
 import { Product } from '../../models/product.interface';
 import { Customer } from '../../models/customer.interface';
 import { SaleRequest, SaleItemRequest, PaymentMethod, Ticket } from '../../models/sale.interface';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-sales',
   standalone: true,
-  imports: [Navbar, CurrencyPipe, FormsModule],
+  imports: [Navbar, CurrencyPipe, FormsModule, DatePipe],
   templateUrl: './sales.html',
   styleUrl: './sales.css'
 })

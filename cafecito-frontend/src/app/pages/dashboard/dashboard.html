@@ -72,11 +72,6 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" [class.active]="activeTab === 'users'" (click)="activeTab = 'users'">
-                        <i class="bi bi-person-gear"></i> Personal
-                    </button>
-                </li>
-                <li class="nav-item">
                     <button class="nav-link" [class.active]="activeTab === 'sales'" (click)="activeTab = 'sales'">
                         <i class="bi bi-receipt"></i> Ventas
                     </button>
@@ -105,7 +100,6 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Producto</th>
-                                    <th>Categoría</th>
                                     <th class="text-end">Precio</th>
                                     <th class="text-center">Stock</th>
                                     <th class="text-center">Estado</th>
@@ -121,7 +115,6 @@
                                                 <small class="text-muted">{{ product.description }}</small>
                                             }
                                         </td>
-                                        <td><span class="badge bg-light text-dark">{{ product.category }}</span></td>
                                         <td class="text-end fw-bold">{{ product.price | currency:'MXN':'symbol':'1.0-0' }}</td>
                                         <td class="text-center">
                                             <span class="badge" [class]="getStockClass(product.stock)">
@@ -144,6 +137,9 @@
                                                     (click)="toggleProductActive(product)"
                                                     [title]="product.isActive !== false ? 'Desactivar' : 'Activar'">
                                                     <i class="bi" [class]="product.isActive !== false ? 'bi-eye-slash' : 'bi-eye'"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" (click)="deleteProduct(product)" title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
                                                 </button>
                                             </div>
                                         </td>
@@ -175,8 +171,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Cliente</th>
-                                    <th>Email</th>
-                                    <th>Teléfono</th>
+                                    <th>Contacto</th>
                                     <th class="text-center">Compras</th>
                                     <th class="text-center">Nivel</th>
                                     <th class="text-center">Descuento</th>
@@ -188,8 +183,14 @@
                                     <tr>
                                         <td class="text-muted">{{ i + 1 }}</td>
                                         <td class="fw-bold">{{ customer.name }}</td>
-                                        <td>{{ customer.email }}</td>
-                                        <td>{{ customer.phone || '—' }}</td>
+                                        <td>
+                                            @if (customer.email) {
+                                                <small class="d-block">{{ customer.email }}</small>
+                                            }
+                                            @if (customer.phone) {
+                                                <small class="d-block text-muted">{{ customer.phone }}</small>
+                                            }
+                                        </td>
                                         <td class="text-center">
                                             <span class="fw-bold">{{ customer.purchasesCount }}</span>
                                         </td>
@@ -215,7 +216,7 @@
                                 }
                                 @empty {
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted py-4">No hay clientes registrados</td>
+                                        <td colspan="7" class="text-center text-muted py-4">No hay clientes registrados</td>
                                     </tr>
                                 }
                             </tbody>
@@ -224,66 +225,7 @@
                 }
             }
 
-            <!-- ===================== TAB 3: USUARIOS ===================== -->
-            @if (activeTab === 'users') {
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">Gestión de Personal</h5>
-                    <button class="btn btn-primary btn-sm" (click)="openUserModal()">
-                        <i class="bi bi-person-plus-fill"></i> Nuevo Usuario
-                    </button>
-                </div>
-
-                @if (loadingUsers) {
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary"></div>
-                    </div>
-                } @else {
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Email</th>
-                                    <th class="text-center">Rol</th>
-                                    <th class="text-center">Fecha registro</th>
-                                    <th class="text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (user of users; track user._id) {
-                                    <tr>
-                                        <td class="fw-bold">{{ user.name }}</td>
-                                        <td>{{ user.email }}</td>
-                                        <td class="text-center">
-                                            <span class="badge" [class]="user.role === 'admin' ? 'bg-warning text-dark' : 'bg-info'">
-                                                {{ user.role === 'admin' ? 'Administrador' : 'Cajero' }}
-                                            </span>
-                                        </td>
-                                        <td class="text-center text-muted">{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm">
-                                                <button class="btn btn-outline-primary" (click)="openUserModal(user)" title="Editar">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-outline-danger" (click)="deleteUser(user)" title="Eliminar">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                                @empty {
-                                    <tr>
-                                        <td colspan="5" class="text-center text-muted py-4">No hay usuarios</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            }
-
-            <!-- ===================== TAB 4: VENTAS ===================== -->
+            <!-- ===================== TAB 3: VENTAS ===================== -->
             @if (activeTab === 'sales') {
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0">Historial de Ventas</h5>
@@ -317,7 +259,7 @@
                                         </td>
                                         <td>
                                             @if (sale.customerId) {
-                                                {{ sale.customerId.name }}
+                                                <span class="text-muted">Cliente vinculado</span>
                                             } @else {
                                                 <span class="text-muted">Público general</span>
                                             }
@@ -349,7 +291,7 @@
                                                     <ul class="mb-0 mt-1">
                                                         @for (item of sale.items; track $index) {
                                                             <li>
-                                                                {{ item.productNameSnapshot || 'Producto' }}
+                                                                {{ item.productNameSnapshot }}
                                                                 — {{ item.quantity }} x {{ item.unitPriceSnapshot | currency }}
                                                                 = {{ item.lineTotal | currency }}
                                                             </li>
@@ -407,20 +349,8 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Categoría</label>
-                        <select class="form-select" [(ngModel)]="productForm.category">
-                            @for (cat of categories; track cat) {
-                                <option [value]="cat">{{ cat }}</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="mb-3">
                         <label class="form-label">Descripción</label>
                         <textarea class="form-control" rows="2" [(ngModel)]="productForm.description" placeholder="Opcional"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">URLs de imágenes</label>
-                        <input type="text" class="form-control" [(ngModel)]="productForm.images" placeholder="url1, url2 (separadas por coma)">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -452,67 +382,19 @@
                         <input type="text" class="form-control" [(ngModel)]="customerForm.name" placeholder="Nombre completo">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control" [(ngModel)]="customerForm.email" placeholder="correo@ejemplo.com">
+                        <label class="form-label">Email <small class="text-muted">(al menos email o teléfono)</small></label>
+                        <input type="email" class="form-control" [(ngModel)]="customerForm.email" placeholder="correo&#64;ejemplo.com">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Teléfono</label>
-                        <input type="text" class="form-control" [(ngModel)]="customerForm.phone" placeholder="Opcional">
+                        <input type="text" class="form-control" [(ngModel)]="customerForm.phone" placeholder="Ej: 4491234567">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" (click)="closeCustomerModal()">Cancelar</button>
-                    <button class="btn btn-primary" (click)="saveCustomer()" [disabled]="!customerForm.name || !customerForm.email">
+                    <button class="btn btn-primary" (click)="saveCustomer()"
+                        [disabled]="!customerForm.name || (!customerForm.email && !customerForm.phone)">
                         {{ editingCustomerId ? 'Guardar Cambios' : 'Crear Cliente' }}
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
-<!-- ===== MODAL: USUARIO ===== -->
-@if (showUserModal) {
-    <div class="modal-backdrop fade show"></div>
-    <div class="modal d-block fade show" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        {{ editingUserId ? 'Editar Usuario' : 'Nuevo Usuario' }}
-                    </h5>
-                    <button class="btn-close" (click)="closeUserModal()"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nombre</label>
-                        <input type="text" class="form-control" [(ngModel)]="userForm.name" placeholder="Nombre completo">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control" [(ngModel)]="userForm.email" placeholder="correo@ejemplo.com">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Contraseña
-                            @if (editingUserId) {
-                                <small class="text-muted">(dejar vacío para no cambiar)</small>
-                            }
-                        </label>
-                        <input type="password" class="form-control" [(ngModel)]="userForm.password" placeholder="Mínimo 6 caracteres">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Rol</label>
-                        <select class="form-select" [(ngModel)]="userForm.role">
-                            <option value="cajero">Cajero</option>
-                            <option value="admin">Administrador</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" (click)="closeUserModal()">Cancelar</button>
-                    <button class="btn btn-primary" (click)="saveUser()" [disabled]="!userForm.name || !userForm.email">
-                        {{ editingUserId ? 'Guardar Cambios' : 'Crear Usuario' }}
                     </button>
                 </div>
             </div>

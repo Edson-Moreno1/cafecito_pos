@@ -11,7 +11,7 @@ export class CustomerService {
 
   constructor(private http: HttpClient) {}
 
-  getAllCustomers(page= 1, limit = 20, q= ''): Observable<PaginatedResponse<Customer>> {
+  getCustomers(page= 1, limit = 20, q= ''): Observable<PaginatedResponse<Customer>> {
     let params = new HttpParams()
       .set('page',page)
       .set('limit',limit);
