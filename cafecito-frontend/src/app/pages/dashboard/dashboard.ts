@@ -253,15 +253,15 @@ export class Dashboard implements OnInit {
   }
 
   // ========== Stats rápidas ==========
-  get totalRevenue(): number {
-    return this.sales.reduce((sum, s) => sum + s.total, 0);
-  }
+ get totalRevenue(): number {
+    return (this.sales || []).reduce((sum, s) => sum + s.total, 0);
+}
 
-  get lowStockCount(): number {
-    return this.products.filter(p => p.stock <= 10 && p.isActive !== false).length;
-  }
+get lowStockCount(): number {
+    return (this.products || []).filter(p => p.stock <= 10 && p.isActive !== false).length;
+}
 
-  get topCustomer(): Customer | null {
-    return this.customers.length > 0 ? this.customers[0] : null;
-  }
+get topCustomer(): Customer | null {
+    return this.customers?.length > 0 ? this.customers[0] : null;
+}
 }
