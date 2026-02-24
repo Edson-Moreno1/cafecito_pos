@@ -259,7 +259,7 @@
                                         </td>
                                         <td>
                                             @if (sale.customerId) {
-                                                <span class="text-muted">Cliente vinculado</span>
+                                                {{ $any(sale.customerId).name || 'Cliente vinculado'}}
                                             } @else {
                                                 <span class="text-muted">Público general</span>
                                             }

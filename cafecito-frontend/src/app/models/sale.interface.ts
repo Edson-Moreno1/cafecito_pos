@@ -32,7 +32,7 @@ export interface SaleItemDetail {
 export interface Sale {
     _id?: string;
     saleId: string;
-    customerId?: string | null;
+    customerId?: { _id: string; name: string; email?: string; phone?: string } | string | null;
     paymentMethod: PaymentMethod;
     items: SaleItemDetail[];
     subtotal: number;
