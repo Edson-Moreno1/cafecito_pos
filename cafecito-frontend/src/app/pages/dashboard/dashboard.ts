@@ -60,7 +60,7 @@ export class Dashboard implements OnInit {
 
   loadProducts() {
     this.loadingProducts = true;
-    this.productService.getProducts(1, 100).subscribe({
+    this.productService.getProducts(1, 100,'','all').subscribe({
       next: (response) => {
         this.products = response.data;
         this.loadingProducts = false;

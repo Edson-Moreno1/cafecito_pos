@@ -13,7 +13,8 @@ export const getAllProducts = async ( req, res) => {
         if(isNaN(limitNum) || limitNum<1 || limitNum>100){
             return res.status(400).json({ message: 'limit debe ser un numero entre 1 y 100'});
         }
-        const filter = { isActive: true };
+        const filter = {};
+        if(req.query.active !== 'all') filter.isActive = true;
         if(q && q.trim() !== ''){
             filter.name = { $regex: q.trim(), $options: 'i' };
         }

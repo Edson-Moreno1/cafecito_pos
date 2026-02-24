@@ -12,10 +12,14 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-  getProducts(page = 1, limit = 20, q= ''): Observable<PaginatedResponse<Product>>{
+  getProducts(page = 1, limit = 20, q= '',active=''): Observable<PaginatedResponse<Product>>{
     let params = new HttpParams()
       .set('page',page)
       .set('limit',limit);
+
+      if(active){
+        params = params.set('active',active);
+      }
 
       if(q.trim()) {
         params = params.set('q',q.trim());
