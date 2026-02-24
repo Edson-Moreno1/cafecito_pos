@@ -72,7 +72,7 @@ export const createProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
     try{
-        const { name, price, stock, description } = req.body;
+        const { name, price, stock, description,isActive } = req.body;
         const updateData = {};
 
         // Solo incluir campos enviados explícitamente
@@ -80,6 +80,7 @@ export const updateProduct = async (req, res) => {
         if(price !== undefined) updateData.price = price;
         if(stock !== undefined) updateData.stock = stock;
         if(description !== undefined) updateData.description = description;
+        if(isActive !== undefined) updateData.isActive = isActive;
 
         const product = await Product.findByIdAndUpdate(req.params.id, updateData, { 
             new: true,
