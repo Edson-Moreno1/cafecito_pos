@@ -62,10 +62,10 @@ export class Dashboard implements OnInit {
     this.loadingProducts = true;
     this.productService.getProducts(1, 100,'','all').subscribe({
       next: (response) => {
-        this.products = response.data;
+        this.products = response.data || [];
         this.loadingProducts = false;
       },
-      error: () => { this.loadingProducts = false; }
+      error: () => { this.products = []; this.loadingProducts = false; }
     });
   }
 
@@ -147,10 +147,10 @@ export class Dashboard implements OnInit {
     this.loadingCustomers = true;
     this.customerService.getCustomers(1, 100).subscribe({
       next: (response) => {
-        this.customers = response.data;
+        this.customers = response.data || [];
         this.loadingCustomers = false;
       },
-      error: () => { this.loadingCustomers = false; }
+      error: () => { this.customers = []; this.loadingCustomers = false; }
     });
   }
 
@@ -223,10 +223,10 @@ export class Dashboard implements OnInit {
     this.loadingSales = true;
     this.saleService.getSales(1, 100).subscribe({
       next: (response) => {
-        this.sales = response.data;
+        this.sales = response.data || [];
         this.loadingSales = false;
       },
-      error: () => { this.loadingSales = false; }
+      error: () => { this.sales = []; this.loadingSales = false; }
     });
   }
 
@@ -253,15 +253,15 @@ export class Dashboard implements OnInit {
   }
 
   // ========== Stats rápidas ==========
- get totalRevenue(): number {
-    return (this.sales || []).reduce((sum, s) => sum + s.total, 0);
-}
+  get totalRevenue(): number {
+    return this.sales.reduce((sum, s) => sum + s.total, 0);
+  }
 
-get lowStockCount(): number {
-    return (this.products || []).filter(p => p.stock <= 10 && p.isActive !== false).length;
-}
+  get lowStockCount(): number {
+    return this.products.filter(p => p.stock <= 10 && p.isActive !== false).length;
+  }
 
-get topCustomer(): Customer | null {
-    return this.customers?.length > 0 ? this.customers[0] : null;
-}
+  get topCustomer(): Customer | null {
+    return this.customers.length > 0 ? this.customers[0] : null;
+  }
 }
