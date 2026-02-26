@@ -17,6 +17,11 @@ dbConnection();
 app.use(express.json());
 app.use(cors());
 
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:4200',
+    credentials: true
+}));
+
 //Rutas
 app.get('/api', (req, res) => {
     res.json({ message: '¡Hola desde la API!' });

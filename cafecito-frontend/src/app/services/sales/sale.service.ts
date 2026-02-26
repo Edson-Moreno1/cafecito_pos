@@ -3,11 +3,12 @@ import { HttpClient,HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Sale, SaleRequest, SaleResponse } from '../../models/sale.interface';
 import { PaginatedResponse } from '../../models/paginatedResponse.interface';
+import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
 export class SaleService {
-  private apiUrl = 'http://localhost:3000/api/sales';
+  private apiUrl = `${environment.apiUrl}/sales`;
 
   constructor(private http: HttpClient) {}
 
