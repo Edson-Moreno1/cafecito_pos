@@ -123,25 +123,24 @@ describe('Dashboard — Inventario', () => {
   });
 
   // ==========================================
-  // ELIMINAR PRODUCTO
+  // ELIMINAR PRODUCTO (realmente archiva → isActive: false)
   // ==========================================
 
   it('debe eliminar producto con confirmación', () => {
     // Registrar handler ANTES del click
     cy.on('window:confirm', () => true);
 
-    cy.get('table tbody tr').then(($rows) => {
-      const initialCount = $rows.length;
-
-      // Eliminar el producto de test (Cypress Test Coffee)
-      cy.contains('Cypress Test Coffee').parents('tr').within(() => {
-        cy.get('button[title="Eliminar"]').click();
-      });
-
-      // Esperar que la tabla se recargue
-      cy.wait(1000);
-      cy.get('table tbody tr').should('have.length.lessThan', initialCount);
+    // Encontrar "Cypress Test Coffee" y eliminarlo (archivarlo)
+    cy.contains('Cypress Test Coffee').parents('tr').within(() => {
+      cy.get('button[title="Eliminar"]').click();
     });
+
+    // El backend hace soft-delete (isActive: false), así que el producto
+    // cambia a "Inactivo" en lugar de desaparecer de la tabla.
+    // Verificar que la fila ahora tiene clase table-secondary (inactivo)
+    cy.contains('Cypress Test Coffee')
+      .parents('tr')
+      .should('have.class', 'table-secondary');
   });
 
   it('debe cancelar eliminación si se rechaza el confirm', () => {

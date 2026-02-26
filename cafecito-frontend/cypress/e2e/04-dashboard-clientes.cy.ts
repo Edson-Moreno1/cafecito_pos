@@ -1,11 +1,19 @@
 describe('Dashboard — Clientes', () => {
 
+  // Sufijo único por corrida para evitar colisiones de unique index
+  const uid = Date.now().toString().slice(-6);
+
+  const testClients = {
+    full: { name: `CypressFull ${uid}`, email: `full${uid}@cy.test`, phone: `449${uid}1` },
+    phone: { name: `CypressPhone ${uid}`, phone: `449${uid}2` },
+    email: { name: `CypressEmail ${uid}`, email: `email${uid}@cy.test` },
+    edited: { name: `CypressEditado ${uid}` }
+  };
+
   beforeEach(() => {
     cy.loginAs('admin');
     cy.visit('/dashboard');
-    // CRITICAL: usar selector específico del tab, no la stat card
     cy.get('.nav-tabs').contains('Clientes').click();
-    // Esperar que la tabla de clientes cargue
     cy.contains('Clientes Frecuentes').should('be.visible');
   });
 
@@ -43,7 +51,6 @@ describe('Dashboard — Clientes', () => {
   });
 
   it('debe mostrar porcentajes de descuento', () => {
-    // La columna de descuento tiene el texto X%
     cy.get('table tbody tr').first().should('contain', '%');
   });
 
@@ -56,38 +63,42 @@ describe('Dashboard — Clientes', () => {
     cy.get('.modal').should('be.visible');
     cy.get('.modal-title').should('contain', 'Nuevo Cliente');
 
-    cy.get('.modal input[placeholder*="Nombre"]').type('Cliente Cypress Test');
-    cy.get('.modal input[type="email"]').type('cypress@test.com');
-    cy.get('.modal input[placeholder*="449"]').type('4491234567');
+    cy.get('.modal input[placeholder="Nombre completo"]').type(testClients.full.name);
+    cy.get('.modal input[placeholder="correo@ejemplo.com"]').type(testClients.full.email);
+    cy.get('.modal input[placeholder="Ej: 4491234567"]').type(testClients.full.phone);
 
     cy.get('.modal button').contains('Crear Cliente').click();
     cy.get('.modal').should('not.exist');
-    cy.contains('Cliente Cypress Test').should('be.visible');
+    cy.contains(testClients.full.name).should('be.visible');
   });
 
   it('debe crear cliente solo con teléfono', () => {
     cy.contains('button', 'Nuevo Cliente').click();
-    cy.get('.modal input[placeholder*="Nombre"]').type('Cliente Solo Phone');
-    cy.get('.modal input[placeholder*="449"]').type('4499999999');
 
+    cy.get('.modal input[placeholder="Nombre completo"]').type(testClients.phone.name);
+    cy.get('.modal input[placeholder="Ej: 4491234567"]').type(testClients.phone.phone);
+
+    cy.get('.modal button').contains('Crear Cliente').should('not.be.disabled');
     cy.get('.modal button').contains('Crear Cliente').click();
     cy.get('.modal').should('not.exist');
-    cy.contains('Cliente Solo Phone').should('be.visible');
+    cy.contains(testClients.phone.name).should('be.visible');
   });
 
   it('debe crear cliente solo con email', () => {
     cy.contains('button', 'Nuevo Cliente').click();
-    cy.get('.modal input[placeholder*="Nombre"]').type('Cliente Solo Email');
-    cy.get('.modal input[type="email"]').type('soloemail@test.com');
 
+    cy.get('.modal input[placeholder="Nombre completo"]').type(testClients.email.name);
+    cy.get('.modal input[placeholder="correo@ejemplo.com"]').type(testClients.email.email);
+
+    cy.get('.modal button').contains('Crear Cliente').should('not.be.disabled');
     cy.get('.modal button').contains('Crear Cliente').click();
     cy.get('.modal').should('not.exist');
-    cy.contains('Cliente Solo Email').should('be.visible');
+    cy.contains(testClients.email.name).should('be.visible');
   });
 
   it('no debe crear cliente sin nombre', () => {
     cy.contains('button', 'Nuevo Cliente').click();
-    cy.get('.modal input[type="email"]').type('test@test.com');
+    cy.get('.modal input[placeholder="correo@ejemplo.com"]').type('test@test.com');
 
     cy.get('.modal button').contains('Crear Cliente').should('be.disabled');
     cy.get('.modal button').contains('Cancelar').click();
@@ -95,7 +106,7 @@ describe('Dashboard — Clientes', () => {
 
   it('no debe crear cliente sin contacto (ni email ni teléfono)', () => {
     cy.contains('button', 'Nuevo Cliente').click();
-    cy.get('.modal input[placeholder*="Nombre"]').type('Sin Contacto');
+    cy.get('.modal input[placeholder="Nombre completo"]').type('Sin Contacto');
 
     cy.get('.modal button').contains('Crear Cliente').should('be.disabled');
     cy.get('.modal button').contains('Cancelar').click();
@@ -106,28 +117,32 @@ describe('Dashboard — Clientes', () => {
   // ==========================================
 
   it('debe editar un cliente existente', () => {
-    cy.contains('Cliente Cypress Test').parents('tr').within(() => {
+    cy.contains(testClients.full.name).parents('tr').within(() => {
       cy.get('button[title="Editar"]').click();
     });
 
     cy.get('.modal').should('be.visible');
     cy.get('.modal-title').should('contain', 'Editar Cliente');
 
-    cy.get('.modal input[placeholder*="Nombre"]').clear().type('Cliente Cypress Editado');
+    cy.get('.modal input[placeholder="Nombre completo"]').clear().type(testClients.edited.name);
     cy.get('.modal button').contains('Guardar Cambios').click();
 
     cy.get('.modal').should('not.exist');
-    cy.contains('Cliente Cypress Editado').should('be.visible');
+    cy.contains(testClients.edited.name).should('be.visible');
   });
 
   // ==========================================
-  // ELIMINAR CLIENTE
+  // ELIMINAR CLIENTE (cleanup de datos de prueba)
   // ==========================================
 
   it('debe eliminar clientes de prueba', () => {
-    const testClients = ['Cliente Cypress Editado', 'Cliente Solo Phone', 'Cliente Solo Email'];
+    const namesToDelete = [
+      testClients.edited.name,
+      testClients.phone.name,
+      testClients.email.name
+    ];
 
-    testClients.forEach((name) => {
+    namesToDelete.forEach((name) => {
       cy.on('window:confirm', () => true);
       cy.get('body').then(($body) => {
         if ($body.text().includes(name)) {
